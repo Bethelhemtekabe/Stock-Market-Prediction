@@ -10,9 +10,12 @@ def load_data(filepath):
     print(f"Loaded {len(df)} rows from '{filepath}'")
     return df
 
+
 def remove_nulls(df):
     """Remove rows that have any missing values. Print a summary."""
     before = len(df)
     df = df.dropna()
     print(f"Removed {before - len(df)} row(s). {len(df)} rows remaining.")
     return df
+
+ 
