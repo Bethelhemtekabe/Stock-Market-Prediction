@@ -63,6 +63,54 @@ def compute_macd(series, fastperiod=12, slowperiod=26, signalperiod=9):
 
 
 
+
+
+
+
+
+import pandas as pd
+
+def backtest_bollinger_breakout(df):
+    """
+    Calculates the cumulative returns for both a Buy & Hold market strategy 
+    and a Bollinger Band breakout strategy.
+    
+    Parameters:
+    - df (pd.DataFrame): Must contain 'Close' and 'upper_band' columns.
+    
+    Returns:
+    - pd.DataFrame: A new DataFrame containing 'Market_Cum' and 'Strategy_Cum'.
+    """
+    # Create a clean working copy to prevent setting-with-copy warnings
+    backtest_df = df.copy()
+    
+    # 1. Calculate underlying asset daily returns
+    backtest_df['Returns'] = backtest_df['Close'].pct_change()
+    
+    # 2. Generate Bollinger Breakout Signal (1 = Invested, 0 = In Cash)
+    backtest_df['Signal'] = 0
+    backtest_df.loc[backtest_df['Close'] > backtest_df['upper_band'], 'Signal'] = 1
+    
+    # 3. Strategy returns use yesterday's signal to trade today's returns
+    backtest_df['Strategy_Returns'] = backtest_df['Signal'].shift(1) * backtest_df['Returns']
+    
+    # 4. Compute compound cumulative performance
+    results = pd.DataFrame(index=backtest_df.index)
+    results['Market_Cum'] = (1 + backtest_df['Returns']).cumprod()
+    results['Strategy_Cum'] = (1 + backtest_df['Strategy_Returns'].fillna(0)).cumprod()
+    
+    return results
+
+
+
+
+
+
+
+
+
+
+
 # Extend pandas with QuantStats methods
 qs.extend_pandas()
 
